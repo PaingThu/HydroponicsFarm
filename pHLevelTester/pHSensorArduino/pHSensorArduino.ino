@@ -1,4 +1,6 @@
 
+#include <SoftwareSerial.h>
+
 #define SENSORPIN A0          // the pH meter Analog output is connected with the Arduino’s Analog A0
 #define BASE 13               // red
 #define PERFECT 2             // green
