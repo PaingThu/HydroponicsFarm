@@ -5,7 +5,6 @@
 #define ACID 4                // yellow
 #define BUZZER 3              // buzzer
 unsigned long int avgValue;   //Store the average value of the sensor feedback
-float b;
 int buf[10], temp, count=0;
 boolean start = true;
 float phValue,tmpValue = 0.0;
@@ -82,7 +81,7 @@ void initSetup(){
 void getSampleValue() {
   for (int i = 0; i < 10; i++) //Get 10 sample value from the sensor for smooth the value
   {
-    buf[i] = analogRead(SensorPin);
+    buf[i] = analogRead(SENSORPIN);
     delay(10);
   }
 }
