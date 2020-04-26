@@ -1,14 +1,15 @@
 
-#define SENSORPIN A0          // the pH meter Analog output is connected with the Arduino’s Analog
+#define SENSORPIN A0          // the pH meter Analog output is connected with the Arduino’s Analog A0
 #define BASE 13               // red
 #define PERFECT 2             // green
 #define ACID 4                // yellow
 #define BUZZER 3              // buzzer
-unsigned long int avgValue;   //Store the average value of the sensor feedback
-int buf[10], temp, count=0;
-boolean start = true;
+unsigned long int avgValue;   // to store the average value of the sensor feedback
+int buf[10], temp, sameValueCount=0;
+boolean start = true, analyseAgain;
 float phValue,tmpValue = 0.0;
 char led;
+
 void setup()
 {
   defineOutputPin();
@@ -18,7 +19,7 @@ void setup()
 
 void loop()
 {
-  while(count<30){
+  while(sameValueCount < 30){
     start = true;
     getSampleValue();
     getSortedValue();
@@ -37,26 +38,21 @@ void loop()
     delay(3000);
     start = false;
   }
-  analysePhLevel();
-  Serial.print("PH Value :");
-  Serial.println(phValue,2);
   switchOnLed();
-  delay(4000);
+  analysePhLevel();
+  //current pH level is shown only three time 
+  if(analyseAgain) {
+    sameValueCount = 0;    //reset sameValueCount
+    Serial.println("pH meter will restart again.");
+    delay(3000);
+  }else{
+    for(int i = 0 ;i < 10; i++){
+      Serial.println("Switch off your device or press reset button to restart again.");
+      delay(10000);
+    }
+  }
 }
 
-void analysePhLevel(){
-  if(led == 'b'){
-    Serial.print("Not Good. This PH Level will damage root of plant.");
-  }
-  if(led == 'a')
-    Serial.print("Not Good. This PH Level is toxic for plant. Too much acid.");
-  if(led == 'p'){
-    if(phValue < 5.8 || phValue > 6.2)
-      Serial.print("It is Good for Plant.");
-    else
-      Serial.print("Greate!!! It is Perfect for Plant.");
-  }
-}
 
 void defineOutputPin(){
   pinMode(BASE, OUTPUT);
@@ -66,7 +62,6 @@ void defineOutputPin(){
 }
 
 void initSetup(){
-  Serial.println("Ready");    //Test the serial monitor
   digitalWrite(BASE, HIGH);
   digitalWrite(PERFECT, HIGH);
   digitalWrite(ACID, HIGH);
@@ -76,6 +71,12 @@ void initSetup(){
   digitalWrite(PERFECT, LOW);
   digitalWrite(ACID, LOW);
   digitalWrite(BUZZER, HIGH);
+  
+  Serial.println("Welcome to pH Level Analysing Department of MPT's Hydroponics Home Farm");    //Test the serial monitor
+  delay(5000);
+  Serial.println("Analysing pH Level will be started soon");
+  delay(3000);
+  
 }
 
 void getSampleValue() {
@@ -113,8 +114,9 @@ void getPhValue(){
 }
 
 void definePHLevel(){
-  if(tmpValue != phValue) tmpValue = phValue;
-  else count++;
+  if(tmpValue == phValue) sameValueCount++; //increase the same value count
+  else tmpValue = phValue;
+  
   if (phValue > 6.5) {
     led = 'b';
     switchOnLed();
@@ -133,6 +135,42 @@ void definePHLevel(){
     delay(10);
     digitalWrite(PERFECT, LOW);
 
+  }
+}
+
+
+void analysePhLevel(){
+  Serial.print("Current pH Value of water is ");
+  Serial.print(phValue,2);
+  Serial.println(".");
+  delay(2000);
+  if(led == 'b'){
+    Serial.println("Not Good!");
+    delay(3000);
+    Serial.println("This pH Level will damage root of plant.");
+    delay(6000);
+    analyseAgain = true;
+  }
+  if(led == 'a'){
+    Serial.println("Not Good!");
+    delay(3000);
+    Serial.println("This pH Level is toxic for plant. Too much acid.");
+    delay(6000);
+    analyseAgain = true;
+  }
+  if(led == 'p'){
+    if(phValue < 5.8 || phValue > 6.2){
+      Serial.println("It is Good for Plant.");
+      delay(3000);
+      Serial.println("Congratulation! You got good pH Level for your plant.");
+    }
+    else{
+      Serial.println("Greate!!! It is Perfect for Plant.");
+      delay(3000);
+      Serial.println("Congratulation! You got best pH Level for your plant.");
+    }
+    delay(6000);
+    analyseAgain = false;
   }
 }
 
