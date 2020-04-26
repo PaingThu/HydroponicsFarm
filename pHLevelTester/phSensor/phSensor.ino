@@ -1,5 +1,5 @@
 
-#define SensorPin A0          // the pH meter Analog output is connected with the Arduino’s Analog
+#define SENSORPIN A0          // the pH meter Analog output is connected with the Arduino’s Analog
 #define BASE 13               // red
 #define PERFECT 2             // green
 #define ACID 4                // yellow
